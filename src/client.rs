@@ -457,7 +457,9 @@ impl<S: Read + Write> Client<S> {
         let mut out: Vec<Vec<String>> = Vec::new();
         for pair in self.read_pairs() {
             let (tag, val) = pair?;
-            let term_idx = terms.iter().rev().position(|i| i.to_lowercase() == tag.to_lowercase()).unwrap();
+            let term_idx = terms.iter().rev().position(
+                |i| i.to_lowercase() == tag.to_lowercase()
+            ).unwrap();
             if term_idx < parse_state.len() {
                 parse_state[term_idx] = val.clone();
                 for i in ((term_idx + 1)..(parse_state.len())).rev() {
@@ -466,9 +468,7 @@ impl<S: Read + Write> Client<S> {
             } else {
                 parse_state.push(val);
             }
-            if parse_state.len() > 2 {
-                out.push(parse_state.clone());
-            }
+            out.push(parse_state.clone());
         }
         Ok(out)
     }
