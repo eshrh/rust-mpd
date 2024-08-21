@@ -15,7 +15,8 @@ use std::str::FromStr;
 pub struct Pairs<I>(pub I);
 
 impl<I> Iterator for Pairs<I>
-where I: Iterator<Item = io::Result<String>>
+where
+    I: Iterator<Item = io::Result<String>>,
 {
     type Item = Result<(String, String)>;
     fn next(&mut self) -> Option<Result<(String, String)>> {
@@ -39,7 +40,8 @@ pub struct Maps<'a, I: 'a> {
 }
 
 impl<'a, I> Iterator for Maps<'a, I>
-where I: Iterator<Item = io::Result<String>>
+where
+    I: Iterator<Item = io::Result<String>>,
 {
     type Item = Result<Vec<(String, String)>>;
     fn next(&mut self) -> Option<Result<Vec<(String, String)>>> {
@@ -84,7 +86,8 @@ where I: Iterator<Item = io::Result<String>>
 }
 
 impl<I> Pairs<I>
-where I: Iterator<Item = io::Result<String>>
+where
+    I: Iterator<Item = io::Result<String>>,
 {
     pub fn split<'a, 'b: 'a>(&'a mut self, f: &'b str) -> Maps<'a, I> {
         Maps { pairs: self, sep: f, value: None, done: false, first: true }
@@ -101,10 +104,13 @@ pub trait Proto {
     fn read_pairs(&mut self) -> Pairs<Lines<&mut BufStream<Self::Stream>>>;
 
     fn run_command<I>(&mut self, command: &str, arguments: I) -> Result<()>
-    where I: ToArguments;
+    where
+        I: ToArguments;
 
     fn read_structs<'a, T>(&'a mut self, key: &'static str) -> Result<Vec<T>>
-    where T: 'a + FromIter {
+    where
+        T: 'a + FromIter,
+    {
         self.read_pairs().split(key).map(|v| v.and_then(|v| FromIter::from_iter(v.into_iter().map(Ok)))).collect()
     }
 
@@ -154,7 +160,9 @@ pub trait Proto {
     }
 
     fn read_field<T: FromStr>(&mut self, field: &'static str) -> Result<T>
-    where ParseError: From<T::Err> {
+    where
+        ParseError: From<T::Err>,
+    {
         let (a, b) = self.read_pair()?;
         self.expect_ok()?;
         if &*a == field {
@@ -167,19 +175,24 @@ pub trait Proto {
 
 pub trait ToArguments {
     fn to_arguments<F, E>(&self, _: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E>;
+    where
+        F: FnMut(&str) -> StdResult<(), E>;
 }
 
 impl ToArguments for () {
     fn to_arguments<F, E>(&self, _: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         Ok(())
     }
 }
 
 impl<'a> ToArguments for &'a str {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         f(self)
     }
 }
@@ -188,7 +201,9 @@ macro_rules! argument_for_display {
     ( $x:path ) => {
         impl ToArguments for $x {
             fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-            where F: FnMut(&str) -> StdResult<(), E> {
+            where
+                F: FnMut(&str) -> StdResult<(), E>,
+            {
                 f(&self.to_string())
             }
         }
@@ -229,7 +244,9 @@ argument_for_tuple! {t0: T0, t1: T1, t2: T2, t3:T3, t4: T4}
 
 impl<'a, T: ToArguments> ToArguments for &'a [T] {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         for arg in *self {
             arg.to_arguments(f)?
         }
@@ -239,13 +256,14 @@ impl<'a, T: ToArguments> ToArguments for &'a [T] {
 
 impl ToArguments for Vec<&str> {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         for arg in self {
             arg.to_arguments(f)?
         }
         Ok(())
     }
-
 }
 
 pub struct Quoted<'a, D: fmt::Display + 'a + ?Sized>(pub &'a D);

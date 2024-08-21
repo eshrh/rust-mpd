@@ -19,7 +19,9 @@ struct MpdConfig {
 
 impl MpdConfig {
     pub fn new<P>(base: P) -> MpdConfig
-    where P: AsRef<Path> {
+    where
+        P: AsRef<Path>,
+    {
         let base = base.as_ref();
         MpdConfig {
             db_file: base.join("db"),

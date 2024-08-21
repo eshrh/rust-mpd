@@ -125,7 +125,9 @@ impl fmt::Display for Subsystem {
 use std::result::Result as StdResult;
 impl crate::proto::ToArguments for Subsystem {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         f(self.to_str())
     }
 }

@@ -25,7 +25,9 @@ pub struct Filter<'a> {
 
 impl<'a> Filter<'a> {
     fn new<W>(typ: Term<'a>, what: W) -> Filter
-    where W: 'a + Into<Cow<'a, str>> {
+    where
+        W: 'a + Into<Cow<'a, str>>,
+    {
         Filter { typ, what: what.into() }
     }
 }
@@ -75,14 +77,18 @@ impl<'a> fmt::Display for Term<'a> {
 
 impl<'a> ToArguments for &'a Term<'a> {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         f(&self.to_string())
     }
 }
 
 impl<'a> ToArguments for &'a Filter<'a> {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         (&self.typ).to_arguments(f)?;
         f(&self.what)
     }
@@ -90,7 +96,9 @@ impl<'a> ToArguments for &'a Filter<'a> {
 
 impl<'a> ToArguments for &'a Query<'a> {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         for filter in &self.filters {
             filter.to_arguments(f)?
         }
@@ -100,7 +108,9 @@ impl<'a> ToArguments for &'a Query<'a> {
 
 impl ToArguments for Window {
     fn to_arguments<F, E>(&self, f: &mut F) -> StdResult<(), E>
-    where F: FnMut(&str) -> StdResult<(), E> {
+    where
+        F: FnMut(&str) -> StdResult<(), E>,
+    {
         if let Some(window) = self.0 {
             f("window")?;
             f(&format! {"{}:{}", window.0, window.1})?;

@@ -20,7 +20,9 @@ impl fmt::Display for Id {
 #[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for Id {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
+    where
+        D: serde::Deserializer<'de>,
+    {
         Ok(Id(u32::deserialize(deserializer)?))
     }
 }
@@ -28,7 +30,9 @@ impl<'de> serde::Deserialize<'de> for Id {
 #[cfg(feature = "serde")]
 impl serde::Serialize for Id {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: serde::Serializer {
+    where
+        S: serde::Serializer,
+    {
         serializer.serialize_u32(self.0)
     }
 }

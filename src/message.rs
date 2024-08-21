@@ -40,7 +40,9 @@ pub struct Channel(String);
 #[cfg(feature = "serde")]
 impl<'de> serde::Deserialize<'de> for Channel {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
+    where
+        D: serde::Deserializer<'de>,
+    {
         Ok(Channel(String::deserialize(deserializer)?))
     }
 }
@@ -48,7 +50,9 @@ impl<'de> serde::Deserialize<'de> for Channel {
 #[cfg(feature = "serde")]
 impl serde::Serialize for Channel {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: serde::Serializer {
+    where
+        S: serde::Serializer,
+    {
         serializer.serialize_str(&self.0)
     }
 }
