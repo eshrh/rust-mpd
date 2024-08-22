@@ -1,6 +1,7 @@
 use crate::error::ParseError;
 use std::str::FromStr;
 
+#[allow(dead_code)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Sticker {
     pub name: String,

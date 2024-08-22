@@ -21,7 +21,7 @@ use crate::status::{ReplayGain, Status};
 use crate::sticker::Sticker;
 use crate::version::Version;
 
-use itertools::{intersperse, Itertools};
+use itertools::intersperse;
 use std::collections::HashMap;
 use std::convert::From;
 use std::io::{BufRead, Lines, Read, Write};
@@ -151,7 +151,6 @@ impl<S: Read + Write> Client<S> {
     }
 
     /// Switch to a next song in queue
-    #[cfg_attr(feature = "cargo-clippy", allow(clippy::should_implement_trait))]
     pub fn next(&mut self) -> Result<()> {
         self.run_command("next", ()).and_then(|_| self.expect_ok())
     }
