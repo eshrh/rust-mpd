@@ -30,6 +30,20 @@ written, but they get ~~the~~ *my* job done. New additions are:
   global search feature.
 - resolved/suppressed all compilation warnings.
 
+With that said, my bar for quality is honestly quite low, I'd rather
+save anybody else the trouble of having to make their own fork to
+add a simple convenience feature. Feel free to send me any patches
+and I'll almost certainly accept them quickly as long as they don't
+break anything!
+
 It is not possible to implement these features that I need without a
 fork because the necessary Client api is not public, and the original
 maintainer has been inactive for some time.
+
+If you'd like to use this fork as a drop-in replacement, you can do
+that the same way I do it in inori:
+```
+[dependencies.mpd]
+package = "inori-mpd"
+version = "0.1.0"
+```
