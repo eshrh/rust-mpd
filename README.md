@@ -6,6 +6,8 @@ chosen the MIT license, and you can find the original
 license/copyright notice [here](./LICENSE-MIT), included with the
 software.
 
+All my original code is public domain under the Unlicense.
+
 Features I have implemented are not particularly idiomatic or well
 written, but they get ~~the~~ *my* job done. New additions are:
 - `listallinfo` command from an upstream
@@ -29,4 +31,5 @@ written, but they get ~~the~~ *my* job done. New additions are:
 - resolved/suppressed all compilation warnings.
 
 It is not possible to implement these features that I need without a
-fork because the necessary Client api is not public.
+fork because the necessary Client api is not public, and the original
+maintainer has been inactive for some time.
