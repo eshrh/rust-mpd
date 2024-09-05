@@ -27,6 +27,9 @@ use std::convert::From;
 use std::io::{BufRead, Lines, Read, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 
+#[cfg(unix)]
+use {std::os::unix::net::UnixStream, std::path::Path};
+
 // Client {{{
 
 /// Client connection
@@ -50,6 +53,14 @@ impl Client<TcpStream> {
     /// Connect client to some IP address
     pub fn connect<A: ToSocketAddrs>(addr: A) -> Result<Client<TcpStream>> {
         TcpStream::connect(addr).map_err(Error::Io).and_then(Client::new)
+    }
+}
+
+#[cfg(unix)]
+impl Client<UnixStream> {
+    /// Connect client to a unix socket
+    pub fn connect<P: AsRef<Path>>(path: P) -> Result<Client<UnixStream>> {
+        UnixStream::connect(path).map_err(Error::Io).and_then(Client::new)
     }
 }
 
@@ -456,9 +467,7 @@ impl<S: Read + Write> Client<S> {
         let mut out: Vec<Vec<String>> = Vec::new();
         for pair in self.read_pairs() {
             let (tag, val) = pair?;
-            let term_idx = terms.iter().rev().position(
-                |i| i.to_lowercase() == tag.to_lowercase()
-            ).unwrap();
+            let term_idx = terms.iter().rev().position(|i| i.to_lowercase() == tag.to_lowercase()).unwrap();
             if term_idx < parse_state.len() {
                 parse_state[term_idx] = val.clone();
                 for i in ((term_idx + 1)..(parse_state.len())).rev() {
