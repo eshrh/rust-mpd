@@ -1,9 +1,11 @@
 extern crate mpd;
 
+use std::net::TcpStream;
+
 use mpd::{Client, Query};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut c = Client::connect("127.0.0.1:6600").unwrap();
+    let mut c = Client::<TcpStream>::connect("127.0.0.1:6600").unwrap();
     println!("version: {:?}", c.version);
     println!("status: {:?}", c.status());
     println!("stuff: {:?}", c.find(&Query::new(), (1, 2)));
