@@ -70,12 +70,14 @@ impl Write for StreamTypes {
     fn write(&mut self, buf: &[u8]) -> std::result::Result<usize, std::io::Error> {
         match self {
             Self::Tcp(s) => s.write(buf),
+            #[cfg(unix)]
             Self::Unix(s) => s.write(buf)
         }
     }
     fn flush(&mut self) -> std::result::Result<(), std::io::Error> {
         match self {
             Self::Tcp(s) => s.flush(),
+            #[cfg(unix)]
             Self::Unix(s) => s.flush()
         }
     }
@@ -84,6 +86,7 @@ impl Read for StreamTypes {
     fn read(&mut self, buf: &mut [u8]) -> std::result::Result<usize, std::io::Error> {
         match self {
             Self::Tcp(s) => s.read(buf),
+            #[cfg(unix)]
             Self::Unix(s) => s.read(buf)
         }
     }
@@ -123,7 +126,8 @@ impl Default for Client<StreamTypes> {
                 ) {
                     return client
                 }
-            if host.starts_with("/") && cfg!(unix) {
+            #[cfg(unix)]
+            if host.starts_with("/") {
                 if let Ok(client) = UnixStream::connect(host)
                     .map_err(Error::Io)
                     .and_then(
@@ -133,24 +137,23 @@ impl Default for Client<StreamTypes> {
                     }
             }
         }
-        if cfg!(unix) {
-            if let Some(runtime_dir) = dirs::runtime_dir() {
-                if let Ok(client) = UnixStream::connect(runtime_dir.join("mpd/socket"))
-                    .map_err(Error::Io)
-                    .and_then(
-                        |stream| Client::new(StreamTypes::Unix(stream))
-                    ) {
-                        return client
-                    }
-            } else {
-                if let Ok(client) = UnixStream::connect("/run/mpd/socket")
-                    .map_err(Error::Io)
-                    .and_then(
-                        |stream| Client::new(StreamTypes::Unix(stream))
-                    ) {
-                        return client
-                    }
-            }
+        #[cfg(unix)]
+        if let Some(runtime_dir) = dirs::runtime_dir() {
+            if let Ok(client) = UnixStream::connect(runtime_dir.join("mpd/socket"))
+                .map_err(Error::Io)
+                .and_then(
+                    |stream| Client::new(StreamTypes::Unix(stream))
+                ) {
+                    return client
+                }
+        } else {
+            if let Ok(client) = UnixStream::connect("/run/mpd/socket")
+                .map_err(Error::Io)
+                .and_then(
+                    |stream| Client::new(StreamTypes::Unix(stream))
+                ) {
+                    return client
+                }
         }
         if let Ok(client) = TcpStream::connect("localhost:6600")
             .map_err(Error::Io)
@@ -159,7 +162,11 @@ impl Default for Client<StreamTypes> {
             ) {
                 return client
             }
-        panic!("Unable to find mpd server at localhost:6600 or /run/mpd/socket")
+        if cfg!(unix) {
+            panic!("Unable to find mpd server at localhost:6600 or /run/mpd/socket")
+        } else {
+            panic!("Unable to find mpd server at localhost:6600")
+        }
     }
 }
 
@@ -175,14 +182,14 @@ impl Client<StreamTypes> {
     }
     /// Try both tcp and unix
     pub fn connect(addr: &str) -> std::result::Result<Client<StreamTypes>, String> {
-        if addr.starts_with("/") && cfg!(unix) {
+        if addr.starts_with("/") {
+            #[cfg(unix)]
             if let Ok(client) = Self::connect_unix(addr) {
                 return Ok(client);
             } else {
                 return Err(format!("Could not connect to mpd unix socket at {}", addr))
             }
-        }
-        if addr.starts_with("/") && !cfg!(unix) {
+            #[cfg(not(unix))]
             return Err("Config mpd address is a path but you are not running unix".into())
         }
         if let Ok(client) = Self::connect_tcp(addr) {
@@ -192,6 +199,7 @@ impl Client<StreamTypes> {
     }
 }
 
+#[cfg(unix)]
 impl Client<UnixStream> {
     /// Connect client to a unix socket
     pub fn connect_socket<P: AsRef<Path>>(path: P) -> Result<Client<UnixStream>> {
